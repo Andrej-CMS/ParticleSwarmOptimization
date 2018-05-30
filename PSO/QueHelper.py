@@ -208,6 +208,6 @@ class QueHelper:
     else:
        htc_jobIDs = HTCondor_jobIDs(os.environ['USER'])
 
-       if str(jobID) in htc_jobIDs): return True
+       if str(jobID) in htc_jobIDs: return True
 
     return False

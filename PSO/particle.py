@@ -130,7 +130,7 @@ class Particle:
          run_file = open(self.Path+'/run.sh', 'w')
          run_lines = self.QueHelper.GetRunLines()
 
-         for line in runlines:
+         for line in run_lines:
              run_file.write('#!/bin/sh')
              run_file.write('\n\n')
              run_file.write('cd '+self.Path)

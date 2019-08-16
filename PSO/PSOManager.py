@@ -35,7 +35,9 @@ class PSOManager:
       self.TenBestMVAs=[[0.0,0.0,"",[],[],[]] for i in range(10)]
       #print self.TenBestMVAs
       self.KSThreshold=0.1
-      RunSystem="EKPSL5"
+
+      RunSystem = 'NAFSL6'
+
       self.NIterations=1
       self.FOM="ROCIntegral"
       self.FindBestVariables = 1
@@ -159,14 +161,23 @@ class PSOManager:
           self.BackgroundWeightExpression=line.split("=",1)[1]
         if "MethodType" in line:
           self.MethodType=line.split("=",1)[1]
+
         if "MethodParams" in line:
           self.MethodParams=line.split("=",1)[1]
 
-        if    "UseFixedTrainTestSplitting" in line:
-          self.UseFixedTrainTestSplitting = line.split("=", 1)[1]
+        if 'UseFixedTrainTestSplitting' in line:
 
-        if    "UseFixedTrainTestSplitting_Train" in line:
-          self.UseFixedTrainTestSplitting_Train = line.split("=", 1)[1]
+           arg = line.split('=', 1)[0].replace(' ','')
+
+           if arg == 'UseFixedTrainTestSplitting':
+              self.UseFixedTrainTestSplitting = line.split('=', 1)[1]
+
+        if 'UseFixedTrainTestSplitting_Train' in line:
+
+           arg = line.split('=', 1)[0].replace(' ','')
+
+           if arg == 'UseFixedTrainTestSplitting_Train':
+              self.UseFixedTrainTestSplitting_Train = line.split('=', 1)[1]
 
         if "SourceBackgroundTree" in line:
           self.BackgroundTreeName=line.split("=",1)[1]
@@ -185,8 +196,8 @@ class PSOManager:
           if coord not in self.Coordinates:
             self.Coordinates.append(coord)
             self.BestCoordinatesGlobal.append([coord[0],0.0])
-      #set up the que system
-      self.QueHelper=QueHelper(RunSystem)
+
+      self.QueHelper = QueHelper(RunSystem)
 
     def InitParticles(self):
 
@@ -275,13 +286,15 @@ class PSOManager:
            estTime=totalTime/it * (nIterations-it)/60.0/60.0
            print "optimization finished in ca ", estTime, " hours"
 
-        print "Number of particles finished: [checked every 180sec]"
+        check_dt_sec = int(60)
+
+        print 'Number of particles finished: [checked every '+str(check_dt_sec)+'sec]'
 
         while running:
 
-          nFinished=0
+          nFinished = 0
 
-          time.sleep(180)
+          time.sleep(check_dt_sec)
 
           htc_jobIDs = None
 
@@ -297,7 +310,7 @@ class PSOManager:
 
           for i_part in self.Particles:
 
-              i_part.isRunning = bool(str(i_part.JobID) in htc_jobIDs and htc_jobIDs[str(i_part.JobID)]['STATUS'] != 'C')
+              i_part.ManageJob(htc_jobIDs)
 
               if not i_part.isRunning: nFinished += 1
 
@@ -386,10 +399,23 @@ class PSOManager:
         bestBDTFile.close()
 
         if FinalMVAConfFile != None:
+
+           # disable Silent mode in FactoryString of .conf file
+           conf_FactoryString = str(self.FactoryString)
+
+           if conf_FactoryString.startswith('Silent:'):
+              conf_FactoryString = '!Silent:'+conf_FactoryString[len(':Silent'):]
+
+           if conf_FactoryString.endswith(':Silent'):
+              conf_FactoryString = conf_FactoryString[:-len(':Silent')]+':!Silent'
+
+           if ':Silent:' in conf_FactoryString:
+              conf_FactoryString = conf_FactoryString.replace(':Silent:', ':!Silent:')
+
            finalMVAConfFile = open(FinalMVAConfFile, 'w')
            finalMVAConfFile.write('[configuration]'+'\n')
            finalMVAConfFile.write('\n')
-           finalMVAConfFile.write('factory    = '+str(self.FactoryString)             +'\n')
+           finalMVAConfFile.write('factory    = '+str(conf_FactoryString)             +'\n')
            finalMVAConfFile.write('dataloader = '+str(self.PreparationString)         +'\n')
            finalMVAConfFile.write('\n')
            finalMVAConfFile.write('method = kBDT, BDTG, '+str(self.TenBestMVAs[0][2]) +'\n')

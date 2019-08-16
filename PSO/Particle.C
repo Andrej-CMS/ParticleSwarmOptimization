@@ -21,6 +21,7 @@
 #include "TMVA/MethodBDT.h"
 #include "TMVA/ResultsClassification.h"
 #include "TMVA/Factory.h"
+#include "TMVA/DataLoader.h"
 #include "TMVA/Tools.h"
 #include "TVirtualFitter.h"
 
@@ -171,31 +172,39 @@ Double_t GetChi2FOM(TH1D* histoSignal,Double_t SignalWeight, TH1D* histoBackgrou
 
  void DoTraining(std::vector<BDTVar*> UsedVars,std::vector<BDTVar*> UnUsedVars,TString FOMType, TString FactoryString, TString PrepString, TString SigWeight, TString BkgWeight, TString SignalTreeName, TString BackgroundTreeName, TString MethodType, TString MethodString, int particleNumber, Double_t* testFOM, Double_t* testKS,Int_t UseFixedTrainTestSplitting, TString PlotName="NONE" ){
    std::cout<<"----------------------------------------------------------------"<<std::endl;
-   
+
    //prepare TMVA
    TMVA::IMethod* im;
    //timing studies
-    TStopwatch* thisTimer = new TStopwatch();
-    Double_t thisTreeTime=0.0;
-    Double_t thisTrainingTime=0.0;
-    Double_t thisTestingTime=0.0;
-    
+
+   TStopwatch* thisTimer = new TStopwatch();
+
+   Double_t thisTreeTime = 0.0;
+   Double_t thisTrainingTime = 0.0;
+   Double_t thisTestingTime = 0.0;
+
    TMVA::Tools::Instance();
-   TString outfileName( "TMVAVars.root" );
+
+   TString outfileName("TMVAVars.root");
+
    int nUsedVars=UsedVars.size();
 
-   TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
-   
-   TMVA::Factory *factory = new TMVA::Factory( "TMVAVars", outputFile,FactoryString );
-   std::cout<<MethodString<<std::endl;
-   
+   TFile* outputFile = TFile::Open(outfileName, "RECREATE");
+
+   TMVA::Factory *factory = new TMVA::Factory("TMVAVars", outputFile, FactoryString);
+   std::cout << "MethodString = " << MethodString << std::endl;
+
+   TMVA::DataLoader* dataloader = new TMVA::DataLoader("dataloader");
+
    std::cout<<"Using Variables"<<std::endl;
-   for(int k=0; k<UsedVars.size(); k++){
+   for(int k=0; k<UsedVars.size(); k++)
+   {
      std::cout<<k<<" "<<UsedVars.at(k)->name<<std::endl; 
-     factory->AddVariable(UsedVars.at(k)->name);
+     dataloader->AddVariable(UsedVars.at(k)->name);
    }
 
    thisTimer->Start();
+
    TFile *inputSTrain;
    TFile *inputBTrain;
    TTree *signalTrain;
@@ -212,21 +221,28 @@ Double_t GetChi2FOM(TH1D* histoSignal,Double_t SignalWeight, TH1D* histoBackgrou
    Double_t wSfChi2=0.0;
    Double_t wBfChi2=0.0;
 
-   if(UseFixedTrainTestSplitting==1){
-   inputSTrain = TFile::Open( "Signal_Train.root" );
-   inputBTrain = TFile::Open( "Background_Train.root" );
-   signalTrain     = (TTree*)inputSTrain->Get(SignalTreeName);
-   backgroundTrain = (TTree*)inputBTrain->Get(BackgroundTreeName);
-   factory->AddSignalTree    ( signalTrain,     1.0,TMVA::Types::kTraining );
-   factory->AddBackgroundTree( backgroundTrain, 1.0,TMVA::Types::kTraining );
-   inputSTest = TFile::Open( "Signal_Test.root" );
-   inputBTest = TFile::Open( "Background_Test.root" );
-   signalTest     = (TTree*)inputSTest->Get(SignalTreeName);
-   backgroundTest = (TTree*)inputBTest->Get(BackgroundTreeName);
-   factory->AddSignalTree    ( signalTest,     1.0,TMVA::Types::kTesting );
-   factory->AddBackgroundTree( backgroundTest, 1.0,TMVA::Types::kTesting );
-   wSfChi2=signalTest->GetMinimum(SigWeight)*signalTest->GetEntries();
-   wBfChi2=backgroundTest->GetMinimum(BkgWeight)*backgroundTest->GetEntries();
+   if(UseFixedTrainTestSplitting == 1)
+   {
+     inputSTrain = TFile::Open("Signal_Train.root");
+     inputBTrain = TFile::Open("Background_Train.root");
+
+     signalTrain     = (TTree*) inputSTrain->Get(SignalTreeName);
+     backgroundTrain = (TTree*) inputBTrain->Get(BackgroundTreeName);
+
+     dataloader->AddSignalTree    (signalTrain,     1.0, TMVA::Types::kTraining);
+     dataloader->AddBackgroundTree(backgroundTrain, 1.0, TMVA::Types::kTraining);
+
+     inputSTest = TFile::Open("Signal_Test.root");
+     inputBTest = TFile::Open("Background_Test.root");
+
+     signalTest     = (TTree*) inputSTest->Get(SignalTreeName);
+     backgroundTest = (TTree*) inputBTest->Get(BackgroundTreeName);
+
+     dataloader->AddSignalTree    (signalTest,     1.0, TMVA::Types::kTesting);
+     dataloader->AddBackgroundTree(backgroundTest, 1.0, TMVA::Types::kTesting);
+
+     wSfChi2 = signalTest    ->GetMinimum(SigWeight) * signalTest    ->GetEntries();
+     wBfChi2 = backgroundTest->GetMinimum(BkgWeight) * backgroundTest->GetEntries();
    }
    else
    {
@@ -239,30 +255,35 @@ Double_t GetChi2FOM(TH1D* histoSignal,Double_t SignalWeight, TH1D* histoBackgrou
      wSfChi2 = (signal    ->GetMinimum(SigWeight) * signal    ->GetEntries());
      wBfChi2 = (background->GetMinimum(BkgWeight) * background->GetEntries());
 
-     factory->AddSignalTree    (signal,     1.0);
-     factory->AddBackgroundTree(background, 1.0);
+     dataloader->AddSignalTree    (signal,     1.0);
+     dataloader->AddBackgroundTree(background, 1.0);
    }
-   factory->SetBackgroundWeightExpression( SigWeight );
-   factory->SetSignalWeightExpression( BkgWeight );
 
-   std::cout << "Running TMVA::Factory::PrepareTrainingAndTestTree(\"\", \"\", \""+PrepString+"\")" << std::endl;
-   factory->PrepareTrainingAndTestTree("", "", PrepString);
+   dataloader->SetBackgroundWeightExpression( BkgWeight );
+   dataloader->SetSignalWeightExpression    ( SigWeight );
+
+   std::cout << "Running TMVA::DataLoader::PrepareTrainingAndTestTree(\"\", \"\", \""+PrepString+"\")" << std::endl;
+   dataloader->PrepareTrainingAndTestTree("", "", PrepString);
 
    //check method and book it
-   if(MethodType=="TMVA::Types::kBDT"){
-     factory->BookMethod( TMVA::Types::kBDT,"myMVA", MethodString );
+   if(MethodType=="TMVA::Types::kBDT")
+   {
+     factory->BookMethod(dataloader, TMVA::Types::kBDT,"myMVA", MethodString);
    }
-   else if(MethodType=="TMVA::Types::kLikelihood"){
-     factory->BookMethod( TMVA::Types::kLikelihood,"myMVA", MethodString );
+   else if(MethodType=="TMVA::Types::kLikelihood")
+   {
+     factory->BookMethod(dataloader, TMVA::Types::kLikelihood,"myMVA", MethodString);
    }
-   else if(MethodType=="TMVA::Types::kMLP"){
-     factory->BookMethod( TMVA::Types::kMLP,"myMVA", MethodString );
+   else if(MethodType=="TMVA::Types::kMLP")
+   {
+     factory->BookMethod(dataloader, TMVA::Types::kMLP,"myMVA", MethodString);
    }
-   else{
+   else
+   {
      std::cout<<"dont know "<<MethodType<<std::endl;
      exit(1);
    }
-   
+
    //timing studies
    thisTreeTime=thisTimer->RealTime();
    thisTimer->Start();
@@ -278,39 +299,44 @@ Double_t GetChi2FOM(TH1D* histoSignal,Double_t SignalWeight, TH1D* histoBackgrou
 
    // ---- Evaluate all MVAs using the set of test events
    factory->TestAllMethods();
-   im = factory -> GetMethod("myMVA");
+
+   im = factory->GetMethod(dataloader->GetName(), "myMVA");
+
    TMVA::MethodBase* myMethod = dynamic_cast<TMVA::MethodBase*>(im);
    Double_t err;
    myMethod->TestClassification();
-   
-  Double_t ROCC1 = myMethod->GetROCIntegral();
+
+   Double_t ROCC1 = myMethod->GetROCIntegral();
    Double_t ROC = myMethod->GetEfficiency("",TMVA::Types::kTesting, err);
+
    //buff is needed for KS test
    Double_t buff = myMethod->GetTrainingEfficiency("Efficiency:0.5");
-std::cout<<"doing sep"<<std::endl;
+
+   std::cout << "doing sep" << std::endl;
+
    Double_t sep = myMethod->GetSeparation();
-//    Double_t sep=0.0;
+//   Double_t sep=0.0;
 
    TMVA::DataSet* myData = myMethod->Data();
    myData->SetCurrentType(TMVA::Types::kTesting);
-   TMVA::ResultsClassification* mvaRes = dynamic_cast<TMVA::ResultsClassification*>
-       (myData->GetResults(myMethod->GetMethodName(),TMVA::Types::kTesting, TMVA::Types::kClassification) );
+
+   TMVA::ResultsClassification* mvaRes = dynamic_cast<TMVA::ResultsClassification*>(myData->GetResults(myMethod->GetMethodName(),TMVA::Types::kTesting, TMVA::Types::kClassification));
+
    TH1* mva_s = (TH1*) mvaRes->GetHist("MVA_S");
    TH1* mva_b = (TH1*) mvaRes->GetHist("MVA_B");
    TH1* mva_effS = (TH1*) mvaRes->GetHist("MVA_EFF_S");
    TH1* mva_effB = (TH1*) mvaRes->GetHist("MVA_EFF_B");
-   
+
    TH1D* mva_s_high = (TH1D*) mvaRes->GetHist("MVA_HIGHBIN_S");
    TH1D* mva_b_high = (TH1D*) mvaRes->GetHist("MVA_HIGHBIN_B");
 /*   TH1* mva_FOMCurve = (TH1*) mvaRes->GetHist("MVA_myMVA_rejBvsS");*/
-   
+
    //do chi2 stuff
    Double_t chi2FOM=0.0;
    if(FOMType=="Chi2_B_muSB"){
      chi2FOM=GetChi2FOM(mva_s_high,wSfChi2,mva_b_high,wBfChi2,"Chi2_B_muSB");
    }
-   
-   
+
    int roccNBins=mva_effS->GetNbinsX();
    TGraph* mva_ROCCurve_H = new TGraph(roccNBins);
    for(int ib=1;ib<=roccNBins;ib++){
@@ -345,8 +371,9 @@ std::cout<<"doing sep"<<std::endl;
    Double_t ksB=0;
    Double_t KS=0;
    myData->SetCurrentType(TMVA::Types::kTraining);
-   TMVA::ResultsClassification* mvaResTrain = dynamic_cast<TMVA::ResultsClassification*>
-       (myData->GetResults(myMethod->GetMethodName(),TMVA::Types::kTraining, TMVA::Types::kClassification) );
+
+   TMVA::ResultsClassification* mvaResTrain = dynamic_cast<TMVA::ResultsClassification*>(myData->GetResults(myMethod->GetMethodName(),TMVA::Types::kTraining, TMVA::Types::kClassification));
+
    TH1* mva_s_tr = (TH1*) mvaRes->GetHist("MVA_TRAIN_S");
    TH1* mva_b_tr = (TH1*) mvaRes->GetHist("MVA_TRAIN_B");
    ksS=mva_s->KolmogorovTest(mva_s_tr);
@@ -397,6 +424,7 @@ std::cout<<"doing sep"<<std::endl;
    TimeTreePreparation+=thisTreeTime;
    TimeTraining+=thisTrainingTime;
    TimeTesting+=thisTestingTime;
+
    delete thisTimer;
 
 // free all the memory
@@ -404,49 +432,59 @@ std::cout<<"doing sep"<<std::endl;
 
 //    delete mvaRes;
 //    delete mvaResTrain;
-   delete myData;
+
+//!!   delete myData;
+
 //    delete mva_s;
 //    delete mva_b;
-//    std::cout<<"here1"<<std::endl;
+
 //    delete mva_effS;
 //    delete mva_effB;
+
    delete mva_ROCCurve_H;
+
 //    delete mva_s_tr;
 //    delete mva_b_tr;
-//    std::cout<<"here2"<<std::endl;
-   delete factory;
-//    std::cout<<"here3"<<std::endl;
-   if(UseFixedTrainTestSplitting==0){
-   delete signal;
-   delete background;
-   inputS->Close();
-   inputB->Close();
-//    std::cout<<"here4"<<std::endl;
-   delete inputS;
-   delete inputB;
-   }
-   else{
-   delete signalTrain;
-   delete backgroundTrain;
-   inputSTrain->Close();
-   inputBTrain->Close();
-//    std::cout<<"here4"<<std::endl;
-   delete inputSTrain;
-   delete inputBTrain;
-   delete signalTest;
-   delete backgroundTest;
-   inputSTest->Close();
-   inputBTest->Close();
-//    std::cout<<"here4"<<std::endl;
-   delete inputSTest;
-   delete inputBTest;   
-   }
-   outputFile->Close();
-   delete outputFile;
 
- }
-    
- 
+   delete factory;
+   delete dataloader;
+
+   if(UseFixedTrainTestSplitting == 0)
+   {
+//!!     delete signal;
+//!!     delete background;
+
+     inputS->Close();
+     inputB->Close();
+
+//!!     delete inputS;
+//!!     delete inputB;
+   }
+   else
+   {
+//!!     delete signalTrain;
+//!!     delete backgroundTrain;
+
+     inputSTrain->Close();
+     inputBTrain->Close();
+
+//!!     delete inputSTrain;
+//!!     delete inputBTrain;
+
+//!!     delete signalTest;
+//!!     delete backgroundTest;
+
+     inputSTest->Close();
+     inputBTest->Close();
+
+//!!     delete inputSTest;
+//!!     delete inputBTest;
+   }
+
+   outputFile->Close();
+//!!   delete outputFile;
+}
+
 void Particle()
 {
   TStopwatch* timerTotal=new TStopwatch();
@@ -478,8 +516,7 @@ void Particle()
  Double_t dumpVal;
  TString dumpName;
  Int_t UseFixedTrainTestSplitting = 0;
- 
-   
+
   //read Config File
   std::ifstream config("ParticleConfig.txt");
   TString dump="";
@@ -905,6 +942,8 @@ void Particle()
   result.close();
 
   TimeTotal = timerTotal->RealTime();
+
+  delete timerTotal;
 
   std::cout<<"*******************************************************"<<std::endl;
   std::cout<<"* Total Time: "<<TimeTotal<<std::endl;

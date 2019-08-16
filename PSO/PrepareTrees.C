@@ -58,6 +58,16 @@ while(readline){
   if(linebuffer.find(searchedString) != std::string::npos)
   {
     UseFixedTrainTestSplitting_Train = linebuffer.substr(searchedString.length());
+
+    if(UseFixedTrainTestSplitting_Train.compare(0, 1, "\"") == 0)
+    {
+      UseFixedTrainTestSplitting_Train = UseFixedTrainTestSplitting_Train.substr(1);
+    }
+
+    if(UseFixedTrainTestSplitting_Train.compare(UseFixedTrainTestSplitting_Train.size()-1, 1, "\"") == 0)
+    {
+      UseFixedTrainTestSplitting_Train = UseFixedTrainTestSplitting_Train.substr(0, UseFixedTrainTestSplitting_Train.size()-1);
+    }
   }
 
   //look for InitialVariables
@@ -158,8 +168,14 @@ config.close();
 
 if(UseFixedTrainTestSplitting)
 {
-  string selTrain = "("+Selection+") *  ("+UseFixedTrainTestSplitting_Train+")";
-  string selTest  = "("+Selection+") * !("+UseFixedTrainTestSplitting_Train+")";
+  string selTrain = " ("+UseFixedTrainTestSplitting_Train+")";
+  string selTest  = "!("+UseFixedTrainTestSplitting_Train+")";
+
+  if(Selection != "")
+  {
+    selTrain += " * ("+Selection+")";
+    selTest  += " * ("+Selection+")";
+  }
 
   std::cout << " Train = \"" << selTrain << "\"" << std::endl;
 

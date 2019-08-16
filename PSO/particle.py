@@ -3,6 +3,8 @@ import subprocess, math, ROOT
 
 from array import array
 
+from common import *
+
 class Particle:
 
     def __init__(self, Path,particleNumber,Verbose, usedVariables, unusedVariables, vw, vp, vg, coordinates, initialcoordinates, FOM, KSThreshold, FactoryString, PreparationString, SignalWeightExpression, BackgroundWeightExpression, SignalTreeName, BackgroundTreeName, MethodType, MethodParams, QueHelper, FindBestVariables, MaxVariablesInCombination, ImprovementThreshold, RepeatTrainingNTimes, DrawNRandomAsStartingVars,SaveTrainingsToTrees,UseFixedTrainTestSplitting,UseFixedTrainTestSplitting_Train):
@@ -11,6 +13,11 @@ class Particle:
       self.Iteration=0
 
       self.Path=Path
+
+      self.fpath_confHTC     = None
+      self.fpath_confHTC_err = None
+      self.fpath_confHTC_out = None
+      self.fpath_confHTC_log = None
 
       self.ExeFile = None
       self.RunFile = self.Path+'/run.sh'
@@ -78,7 +85,7 @@ class Particle:
             print "unusedVariables\n", self.additionalVariables
             print il, len(self.initialVariables), len(self.additionalVariables)
 
-      self.SaveTrainingsToTrees=SaveTrainingsToTrees
+      self.SaveTrainingsToTrees = SaveTrainingsToTrees
 
       self.UseFixedTrainTestSplitting       = UseFixedTrainTestSplitting
       self.UseFixedTrainTestSplitting_Train = UseFixedTrainTestSplitting_Train
@@ -122,9 +129,9 @@ class Particle:
       else:
 
          # HTCondor configuration script
-         config_fpath = self.Path+'/conf.htc'
+         self.fpath_confHTC = os.path.abspath(self.Path+'/conf.htc')
 
-         config_file = open(config_fpath, 'w')
+         config_file = open(self.fpath_confHTC, 'w')
          config_lines = self.QueHelper.GetConfigLines()
 
          for line in config_lines:
@@ -144,9 +151,9 @@ class Particle:
 
          run_file.write('#!/bin/sh')
          run_file.write('\n\n')
-         run_file.write('cd '+self.Path)
+         run_file.write('cd '+os.path.dirname(self.fpath_confHTC))
          run_file.write('\n')
-         run_file.write('condor_submit conf.htc')
+         run_file.write('condor_submit '+os.path.basename(self.fpath_confHTC))
          run_file.write('\n')
 
          run_file.close()
@@ -157,7 +164,7 @@ class Particle:
 
     def WriteConfig(self):
       # write ConfigFile
-      configfile=open(self.Path+"/ParticleConfig.txt","w")
+      configfile = open(self.Path+"/ParticleConfig.txt","w")
       configfile.write("particleNumber "+str(self.particleNumber)+"\n")
       configfile.write("Iteration "+str(self.Iteration)+"\n")
       configfile.write("FOM "+str(self.FOM)+"\n")
@@ -170,8 +177,17 @@ class Particle:
       configfile.write("SignalTreeName "+str(self.SignalTreeName)+"\n")
       configfile.write("BackgroundTreeName "+str(self.BackgroundTreeName)+"\n")
 
-      configfile.write("UseFixedTrainTestSplitting "      +str(self.UseFixedTrainTestSplitting)      +"\n")
-      configfile.write("UseFixedTrainTestSplitting_Train "+str(self.UseFixedTrainTestSplitting_Train)+"\n")
+      configfile.write("UseFixedTrainTestSplitting "+str(self.UseFixedTrainTestSplitting)+"\n")
+
+      str_UseFixedTrainTestSplitting_Train = str(self.UseFixedTrainTestSplitting_Train)
+
+      while str_UseFixedTrainTestSplitting_Train.startswith('"') or str_UseFixedTrainTestSplitting_Train.startswith("'"):
+            str_UseFixedTrainTestSplitting_Train = str_UseFixedTrainTestSplitting_Train[1:]
+
+      while str_UseFixedTrainTestSplitting_Train.endswith('"') or str_UseFixedTrainTestSplitting_Train.endswith("'"):
+            str_UseFixedTrainTestSplitting_Train = str_UseFixedTrainTestSplitting_Train[:-1]
+
+      configfile.write("UseFixedTrainTestSplitting_Train \""+str_UseFixedTrainTestSplitting_Train+"\"\n")
 
       configfile.write("FindBestVariables "+str(self.FindBestVariables)+"\n")
       configfile.write("MaxVariablesInCombination "+str(self.MaxVariablesInCombination)+"\n")
@@ -194,14 +210,17 @@ class Particle:
       self.MethodParams=methodString
       configfile.write("MethodParameters "+str(self.MethodParams)+"\n")
 
+      if len(self.initialVariables) == 0:
+         KILL('particle.py -- WriteConfig: empty list of initial variables')
+
       configfile.write("--InitialVariables--"+"\n")
-      for var in self.initialVariables:
-        configfile.write(var+"\n")
+      for var in self.initialVariables: configfile.write(var+"\n")
       configfile.write("--EndInitVars--\n")
+
       configfile.write("--additionalVariables--\n")
-      for var in self.additionalVariables:
-        configfile.write(var+"\n")
+      for var in self.additionalVariables: configfile.write(var+"\n")
       configfile.write("--EndAddVars--\n")
+
       configfile.close()
 
     def StartEvaluation(self):
@@ -209,7 +228,82 @@ class Particle:
         self.JobID = self.QueHelper.StartJob(self.Path+'/run.sh')
 #        print self.JobID
 
+        fpath_dc = {}
+
+        with open(self.fpath_confHTC, 'r') as cfg_file:
+
+             cfg_lines = cfg_file.readlines()
+
+             for i_line in cfg_lines:
+                 i_line = i_line.replace('\n', '')
+                 i_line = i_line.replace(' ' , '')
+
+                 if   i_line.startswith('error=') : fpath_dc['err'] = i_line[len('error='):]
+                 elif i_line.startswith('output='): fpath_dc['out'] = i_line[len('output='):]
+                 elif i_line.startswith('log=')   : fpath_dc['log'] = i_line[len('log='):]
+
+        for i_type in ['err', 'out', 'log']:
+
+            if i_type not in fpath_dc:
+               KILL('particle.py -- StartEvaluation: path to job \"'+i_type+'\" file not found in HTCondor configuration file: '+self.fpath_confHTC)
+
+        self.fpath_confHTC_err = fpath_dc['err'].replace('$(Cluster).$(Process)', str(self.JobID))
+        self.fpath_confHTC_out = fpath_dc['out'].replace('$(Cluster).$(Process)', str(self.JobID))
+        self.fpath_confHTC_log = fpath_dc['log'].replace('$(Cluster).$(Process)', str(self.JobID))
+
         self.isRunning = True
+
+        return
+
+    def ManageJob(self, jobID_dict):
+
+        if os.path.isfile(self.fpath_confHTC_err) and (os.path.getsize(self.fpath_confHTC_err) != 0):
+
+           log_msg = 'job '+str(self.JobID)+' returned ERROR (stderr file not empty),'
+
+           self.QueHelper.KillJob(str(self.JobID))
+
+           # resubmit
+           self.StartEvaluation()
+
+           log_msg += ' has been removed and resubmitted as job '+str(self.JobID)
+
+           WARNING('particle.py -- ManageJob: '+log_msg)
+
+        else:
+
+           job_exists = bool(str(self.JobID) in jobID_dict)
+
+           if not job_exists:
+
+              self.isRunning = False
+
+           else:
+
+              job_status = jobID_dict[str(self.JobID)]['STATUS']
+
+              if bool(job_status == 'C'):
+
+                 self.isRunning = False
+
+              elif bool(job_status in ['H','X']):
+
+                 log_msg = 'job '+str(self.JobID)+' found in status "'+job_status+'"'
+
+                 self.QueHelper.KillJob(str(self.JobID))
+
+                 # resubmit
+                 self.StartEvaluation()
+
+                 log_msg += ' has been removed and resubmitted as job '+str(self.JobID)
+
+                 WARNING('particle.py -- ManageJob: '+log_msg)
+
+              else:
+
+                 self.isRunning = True
+
+        return
 
     def UpdateParticle(self, BestCoordsGlobal,Iteration,bestFOMGlobal, bestKSGlobal):
       self.Iteration=Iteration
@@ -244,27 +338,32 @@ class Particle:
             cc=c[1]
             curVel=c[2]
             break
+
         rp=self.rand.Rndm()
         rg=self.rand.Rndm()
-        newVel=self.vw*curVel + self.vp*rp*(bcp-cc)+self.vg*rg*(bcg-cc)
-        newVel=cmp(newVel,0)*min(abs(newVel),coord[3])
-        if coord[4]=="int":
-          newVel=int(newVel)
-        elif coord[4]=="float":
-          newVel=float(newVel)
-        newcoord=cc+newVel
-        newcoord=abs(cmp(newcoord,0)*min(abs(newcoord),coord[2]))
-        newcoord=abs(cmp(newcoord,0)*max(abs(newcoord),coord[1]))
+
+        newVel = self.vw*curVel + self.vp*rp*(bcp-cc)+self.vg*rg*(bcg-cc)
+
+        newVel = cmp(newVel,0) * min(abs(newVel),coord[3])
+
+        if   coord[4] == 'int'  : newVel = int  (newVel)
+        elif coord[4] == 'float': newVel = float(newVel)
+
+        newcoord = cc + newVel
+        newcoord = abs(cmp(newcoord,0)*min(abs(newcoord),coord[2]))
+        newcoord = abs(cmp(newcoord,0)*max(abs(newcoord),coord[1]))
+
         if self.Verbose:
-          print "\nOld Coordinate ", coord[0],cc,curVel
-          print "best global ", bcg
-          print "best for this particle ", bcp
-        if self.Verbose:
-          print "New Coordinate ", newcoord, newVel
+           print "\nOld Coordinate ", coord[0],cc,curVel
+           print "best global ", bcg
+           print "best for this particle ", bcp
+
+           print "New Coordinate ", newcoord, newVel
+
         newCoords.append([coord[0],newcoord,newVel])
 
       self.currentCoordinates=newCoords
-#      print self.currentCoordinates
+
       self.WriteConfig()
 
     def GetResult(self):
@@ -300,20 +399,23 @@ class Particle:
           self.additionalVariables.append(vv)
 
       if ks<self.KSThreshold:
-        fom=0.0
-        ks=0.0
+         fom = 0.0
+         ks  = 0.0
 
       else:
         if fom>=self.BestFOM:
-          self.BestFOM=fom
-          self.BestKS=ks
-          self.BestCoordinates=[]
-          for coord in self.currentCoordinates:
-            self.BestCoordinates.append([coord[0],coord[1]])
+
+           self.BestFOM=fom
+           self.BestKS=ks
+           self.BestCoordinates=[]
+
+           for coord in self.currentCoordinates:
+               self.BestCoordinates.append([coord[0],coord[1]])
+
       if self.Verbose:
-        print "particle ", self.particleNumber
-        print self.BestCoordinates
-        print self.BestFOM
+         print "particle ", self.particleNumber
+         print self.BestCoordinates
+         print self.BestFOM
 
       RouteFile=open(self.Path+"/ParticleRoute.txt","a")
       Route=str(fom).replace("\n","")+" "+str(ks).replace("\n","")+" "

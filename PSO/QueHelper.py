@@ -80,7 +80,7 @@ class QueHelper:
         "#!/bin/bash\n",
         "source /etc/profile.d/modules.sh\n",
         "module use -a /afs/desy.de/group/cms/modulefiles/\n",
-        "module load cmssw/"+self.SCRAM_ARCH+"\n",
+        "module load cmssw"+"\n",
         "export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch\n",
         "export SCRAM_ARCH="+self.SCRAM_ARCH+"\n",
         "source $VO_CMS_SW_DIR/cmsset_default.sh\n",
@@ -119,7 +119,7 @@ class QueHelper:
         'requirements = (OpSysAndVer == "SL6")',
         '#requirements = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")',
 
-        ' RequestMemory  = 2G',
+        ' RequestMemory  =  2000',
         '+RequestRuntime = 10800',
 
         'queue',
@@ -189,8 +189,24 @@ class QueHelper:
 
          if jobID == None:
 
-            WARNING('QueHelper.py -- job submission failed, will wait 60sec and try again')
+            WARNING('QueHelper.py -- StartJob: job submission failed, will wait 60sec and try again')
 
             time.sleep(60)
 
       return jobID
+
+  def KillJob(self, jobID_str):
+
+      ret = None
+
+      while ret == None:
+
+         ret = get_output('condor_rm '+jobID_str, permissive=True)
+
+         if ret == None:
+
+            WARNING('QueHelper.py -- KillJob: job removal failed, will wait 60sec and try again')
+
+            time.sleep(60)
+
+      return

@@ -199,10 +199,20 @@ Double_t GetChi2FOM(TH1D* histoSignal,Double_t SignalWeight, TH1D* histoBackgrou
    std::cout<<"Using Variables"<<std::endl;
    for(int k=0; k<UsedVars.size(); k++)
    {
-     std::cout<<k<<" "<<UsedVars.at(k)->name<<std::endl; 
-     dataloader->AddVariable(UsedVars.at(k)->name);
+      if (UsedVars.at(k)->name.Contains("Combination"))
+      {
+        std::cout<<"Adding Spectator " <<k<<" "<<UsedVars.at(k)->name<<std::endl; 
+        dataloader->AddSpectator(UsedVars.at(k)->name);
+      }
+      else
+      {
+        std::cout<<k<<" "<<UsedVars.at(k)->name<<std::endl; 
+        dataloader->AddVariable(UsedVars.at(k)->name);
+      }
+     
    }
-
+//   dataloader->AddSpectator( "correctCombination", "", "", 0, 1, "I" );
+//   dataloader->AddSpectator( "swappedCombination", "", "", 0, 1, "I" );
    thisTimer->Start();
 
    TFile *inputSTrain;
@@ -263,7 +273,7 @@ Double_t GetChi2FOM(TH1D* histoSignal,Double_t SignalWeight, TH1D* histoBackgrou
    dataloader->SetSignalWeightExpression    ( SigWeight );
 
    std::cout << "Running TMVA::DataLoader::PrepareTrainingAndTestTree(\"\", \"\", \""+PrepString+"\")" << std::endl;
-   dataloader->PrepareTrainingAndTestTree("", "", PrepString);
+   dataloader->PrepareTrainingAndTestTree("correctCombination != 0", "correctCombination == 0 && swappedCombination == 0", PrepString);
 
    //check method and book it
    if(MethodType=="TMVA::Types::kBDT")

@@ -73,14 +73,13 @@ class QueHelper:
           "qsub -cwd -S /bin/bash -o INSERTPATHHERE/logs/\$JOB_NAME.o\$JOB_ID -e INSERTPATHHERE/logs/\$JOB_NAME.e\$JOB_ID -q 'medium' INSERTEXECSCRIPTHERE\n"
           ]
 
-    elif RunSystem == "NAFSL6":
+    elif RunSystem == "NAFSL7":
 
       self.ExecLines = [
 
         "#!/bin/bash\n",
         "source /etc/profile.d/modules.sh\n",
         "module use -a /afs/desy.de/group/cms/modulefiles/\n",
-        "module load cmssw"+"\n",
         "export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch\n",
         "export SCRAM_ARCH="+self.SCRAM_ARCH+"\n",
         "source $VO_CMS_SW_DIR/cmsset_default.sh\n",
@@ -116,8 +115,8 @@ class QueHelper:
         'should_transfer_files   = IF_NEEDED',
         'when_to_transfer_output = ON_EXIT',
 
-        'requirements = (OpSysAndVer == "SL6")',
-        '#requirements = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")',
+        '#requirements = (OpSysAndVer == "SL6")',
+        'requirements = (OpSysAndVer == "CentOS7")',
 
         ' RequestMemory  =  2000',
         '+RequestRuntime = 10800',

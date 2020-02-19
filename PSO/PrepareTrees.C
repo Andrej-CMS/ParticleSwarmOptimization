@@ -163,6 +163,38 @@ while(readline){
       AddVar(name,type,size,expression );
     }
   }
+
+  searchedString="SpectatorVariables";
+  if(linebuffer.find(searchedString)!=std::string::npos){
+    bool readingVars=true;
+//     std::cout<<"WeightVariables:"<<std::endl;
+    while(readingVars){
+      std::getline(config,linebuffer);
+      if(linebuffer.find("#")!=std::string::npos || linebuffer=="")continue;
+      if(linebuffer.find("EndVariables")!=std::string::npos || config.eof()){
+        readingVars=false; 
+        continue;
+        }
+      string name,type,size,expression;
+      size_t id1, id2;
+      id1=linebuffer.find("\"");
+      id2=linebuffer.find("\"",id1+1);
+      name=linebuffer.substr(id1+1,id2-id1-1);
+      id1=linebuffer.find("\"",id2+1);
+      id2=linebuffer.find("\"",id1+1);
+      type=linebuffer.substr(id1+1,id2-id1-1);
+      id1=linebuffer.find("\"",id2+1);
+      id2=linebuffer.find("\"",id1+1);
+      size=linebuffer.substr(id1+1,id2-id1-1);
+      id1=linebuffer.find("\"",id2+1);
+      id2=linebuffer.find("\"",id1+1);
+      expression=linebuffer.substr(id1+1,id2-id1-1);
+      std::cout<<"Did Variable "<<name<<" "<<type<<" "<<size<<" "<<expression<<std::endl;
+//       if(size=="")std::cout<<"zero"<<std::endl;
+      AddVar(name,type,size,expression );
+    }
+  }
+
 }
 config.close();
 

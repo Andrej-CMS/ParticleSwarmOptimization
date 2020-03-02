@@ -57,11 +57,13 @@ class PSOManager:
       self.UseFixedTrainTestSplitting = 0
       self.UseFixedTrainTestSplitting_Train = '(eventNumber%2)==0'
 
-      initialVariables=[]
-      additionalVariables=[]
-      ivars=[]
-      avars=[]
-      weightVariables=[]
+      initialVariables = []
+      additionalVariables = []
+      SpectatorVariables = []
+      ivars = []
+      avars = []
+      svars = []
+      weightVariables = []
       configFile=open(PSOConfig,"r")
       configLines=list(configFile)
       configFile.close()
@@ -78,6 +80,11 @@ class PSOManager:
         id2=configLines.index("EndVariables")
         additionalVariables=configLines[id1+1:id2]
         configLines=configLines[:id1]+configLines[id2+1:]
+      if "SpectatorVariables:" in configLines and "EndVariables" in configLines:
+        id1=configLines.index("SpectatorVariables:")
+        id2=configLines.index("EndVariables")
+        SpectatorVariables=configLines[id1+1:id2]
+        configLines=configLines[:id1]+configLines[id2+1:]
 
       if len(initialVariables)>0:
         for i, var in enumerate(initialVariables):
@@ -91,10 +98,17 @@ class PSOManager:
             continue
           v=json.loads(var)
           avars.append(str(v[0]))
+      if len(SpectatorVariables)>0:
+        for i, var in enumerate(SpectatorVariables):
+          if "#" in var:
+            continue
+          v=json.loads(var)
+          svars.append(str(v[0]))
       #check the input variables
       print "inital Variables ", len(ivars), ivars
       print "additional Variables ", len(avars), avars
-      allVars=avars+ivars
+      print "spectator Variables", len(svars), svars
+      allVars=avars+ivars+svars
       for var1 in allVars:
         counter=0
         for var2 in allVars:
@@ -104,7 +118,7 @@ class PSOManager:
             print "ERROR: input variables defined multiple times"
             print var1
             exit(1)
-
+      print "ivars ", ivars
       self.usedVariables=ivars
       self.unusedVariables=avars
       #self.TenBestMVAs[0]=(0.0,0.0,0.0,0.0,0.0,0,2,self.usedVariables, self.unusedVariables)
@@ -357,6 +371,9 @@ class PSOManager:
 
         print self.TenBestMVAs[0][:5]
 
+        print "testing blabla "
+        print "OutputDir = ", self.OutputDir
+
         self.SaveStatus(self.OutputDir+"/PSOResult.txt", self.OutputDir+"/FinalMVAConfig_PSO.txt", self.OutputDir+'.conf')
 
         finishTime = time.time()
@@ -397,6 +414,9 @@ class PSOManager:
         bestBDTFile.write(                str(self.TenBestMVAs[0][:5])        +'\n')
         bestBDTFile.write('\n')
         bestBDTFile.close()
+
+        print " OutputDir = " , self.OutputDir
+        print " usedVariables = ", self.usedVariables
 
         if FinalMVAConfFile != None:
 

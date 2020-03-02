@@ -1,7 +1,7 @@
 ##Parameters for the Particle Swarm Optimization
 
-##RunOn = EKPSL5 | EKPSL5 | NAFSL5 | NAFSL7
-RunOn=NAFSL7
+##RunOn = EKPSL5 | EKPSL5 | NAFSL5 | NAFSL6
+RunOn=NAFSL6
 
 ## Swarm Parameters
 NParticles=50
@@ -16,13 +16,13 @@ KSThreshold=0.2
 MaxVariablesInCombination=12
 FindBestVariables=0
 ##only add variable if new FOM > ImprovementThreshold*FOM
-ImprovementThreshold=1.005
+ImprovementThreshold=1.002
 
 ## repeat each training additional times with different random seeds for test/training splitting (0==no repetition)
 ## only reasonable if SplitSeed=0 is in the PreparationString a few lines down
 ## and if UseEvenOddSplitting=0
 ## FOM and KS will be taken as the worst of all trainings
-RepeatTrainingNTimes=0
+RepeatTrainingNTimes=2
 ## draw random starting variables, 0== use predermined starting variables
 DrawNRandomAsStartingVars=0
 ##NOTYET SaveTrainingsToTrees=False

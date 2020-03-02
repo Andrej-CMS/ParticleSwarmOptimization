@@ -1,7 +1,7 @@
 #include "TreeHeader.h"
 #include <fstream>
 
-void PrepareTrees(string configName="", const std::string& OutPath="InitData"){
+void PrepareTrees(string configName="", const std::string OutPath="InitData"){
 
 string SignalFile;
 string SignalTree;

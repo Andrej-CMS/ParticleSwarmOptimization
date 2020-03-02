@@ -76,11 +76,11 @@ void myFCN(Int_t & nPar, Double_t * grad, Double_t &fval, Double_t *p, Int_t fla
   Double_t scaleB=1.0;
   Double_t scaleS=1.0;
   
-  if(Chi2ScaleBackground==true){scaleB=p[0];}
-  if(Chi2ScaleSignal==true){scaleS=p[0];}
+  if(Chi2ScaleBackground == true){scaleB=p[0];}
+  if(Chi2ScaleSignal == true){scaleS=p[0];}
   
   TH1D* histoData=(TH1D*)BackgroundForChi2->Clone("histoData");
-  if(Chi2DoSplusB==true){
+  if(Chi2DoSplusB == true){
     histoData->Add(SignalForChi2,1.0);
   }
   
@@ -768,7 +768,7 @@ void Particle()
       FOM=999.9;
       for(int nn=0;nn<RepeatTrainingNTimes+1;nn++){
       std::cout<<"Training Nr. "<<nn<<std::endl; 
-      DoTraining(UsedVars, UnusedVars,FOMType,FactoryString,PrepString,SigWeight,BkgWeight,SignalTreeName,BackgroundTreeName,MethodType,MethodString, particleNumber, &bufferFOM, &bufferKS,UseFixedTrainTestSplitting);
+      DoTraining(UsedVars, UnusedVars,FOMType,FactoryString,PrepString,SigWeight,BkgWeight,SignalTreeName,BackgroundTreeName,MethodType,MethodString, particleNumber, &bufferFOM, &bufferKS, UseFixedTrainTestSplitting);
       if(bufferKS<KS)KS=bufferKS;
       if(bufferFOM<FOM)FOM=bufferFOM;
       }

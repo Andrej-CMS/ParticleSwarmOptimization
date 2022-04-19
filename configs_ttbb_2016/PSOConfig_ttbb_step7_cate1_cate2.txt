@@ -5,7 +5,7 @@ RunOn=NAFSL6
 
 ## Swarm Parameters
 NParticles=50
-NIterations=30
+NIterations=20
 wIneratia=0.729
 wMemory=1.49445
 wSwarm=1.49445
@@ -67,10 +67,10 @@ coord=["MaxDepth",2,5,1,"int"]
 ##    else TMVA will use built-in splitting
 UseEvenOddSplitting=0
 
-SourceBackgroundFile=ttbb_Input_2016_NottOther/background_TrainingPlusTesting.root
+SourceBackgroundFile=ttbb_Input_2016_Withttother/background_TrainingPlusTesting.root
 SourceBackgroundTree=topJets_mvaVariables_step7_cate1_cate2
 
-SourceSignalFile=ttbb_Input_2016_NottOther/signal_TrainingPlusTesting.root
+SourceSignalFile=ttbb_Input_2016_Withttother/signal_TrainingPlusTesting.root
 SourceSignalTree=topJets_mvaVariables_step7_cate1_cate2
 ##--------------------------------------------------
 

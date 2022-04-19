@@ -176,6 +176,58 @@ class QueHelper:
         'queue',
       ]
 
+    elif RunSystem == "NAFSL7":
+
+        self.ExecLines = [
+
+          "#!/bin/bash\n",
+          "source /etc/profile.d/modules.sh\n",
+          "module use -a /afs/desy.de/group/cms/modulefiles/\n",
+          "#module load cmssw/"+self.SCRAM_ARCH+"\n",
+          "export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch\n",
+          "export SCRAM_ARCH="+self.SCRAM_ARCH+"\n",
+          "source $VO_CMS_SW_DIR/cmsset_default.sh\n",
+          "cd "+self.CMSSW_BASE+"/src\n",
+          "eval `scram runtime -sh`\n",
+        ]
+
+        # HTCondor getenv=True does not export LD_LIBRARY_PATH
+        # --> added by hand in the script itself
+        if 'LD_LIBRARY_PATH' in os.environ:
+           self.ExecLines += ['\n']
+           self.ExecLines += ['export LD_LIBRARY_PATH='+os.environ['LD_LIBRARY_PATH']]
+           self.ExecLines += ['\n\n']
+
+        self.ConfigLines = [
+
+          'batch_name = __BATCH_NAME__',
+
+          'executable = __EXEC_FILE__',
+
+          'output = __PATH__/logs/__NAME__'+'.out.'+'$(Cluster).$(Process)',
+          'error  = __PATH__/logs/__NAME__'+'.err.'+'$(Cluster).$(Process)',
+          'log    = __PATH__/logs/__NAME__'+'.log.'+'$(Cluster).$(Process)',
+
+          '#arguments = ',
+
+          'transfer_executable = True',
+
+          'universe = vanilla',
+
+          'getenv = True',
+
+          'should_transfer_files   = IF_NEEDED',
+          'when_to_transfer_output = ON_EXIT',
+
+          '#requirements = (OpSysAndVer == "SL6")',
+          'requirements = (OpSysAndVer == "CentOS7")',
+
+          ' RequestMemory  =  2000',
+          '+RequestRuntime = 10799',
+
+          'queue',
+        ]
+
     elif RunSystem=="NAFSL5":
       self.ExecLines=[
         "#!/bin/bash",

@@ -1,6 +1,6 @@
 ##Parameters for the Particle Swarm Optimization
 
-##RunOn = EKPSL5 | EKPSL5 | NAFSL5 | NAFSL6
+##RunOn = EKPSL5 | EKPSL5 | NAFSL5 | NAFSL6 | NAFSL7
 RunOn=NAFSL7
 
 ## Swarm Parameters
@@ -29,7 +29,7 @@ DrawNRandomAsStartingVars=0
 
 ##TMVA Options
 FactoryString=!V:Silent:Color:!DrawProgressBar:Transformations=I:AnalysisType=Classification
-PreparationString=SplitMode=Block:SplitSeed=100:NormMode=NumEvents:!V
+PreparationString=SplitMode=Random:NormMode=EqualNumEvents:!V
 ##if you want to limit the number of events do it eiter PreparationString or here
 #nTrain_Signal=
 #nTrain_Background=
@@ -67,10 +67,10 @@ coord=["MaxDepth",2,5,1,"int"]
 ##    else TMVA will use built-in splitting
 UseEvenOddSplitting=0
 
-SourceBackgroundFile=ttbb_Input_2018/background_TrainingPlusTesting.root
+SourceBackgroundFile=ttbb_Input_2018_TTOTHER_19092020/background_TrainingPlusTesting.root
 SourceBackgroundTree=topJets_mvaVariables_step7_cate1_cate2
 
-SourceSignalFile=ttbb_Input_2018/signal_TrainingPlusTesting.root
+SourceSignalFile=ttbb_Input_2018_TTOTHER_19092020/signal_TrainingPlusTesting.root
 SourceSignalTree=topJets_mvaVariables_step7_cate1_cate2
 ##--------------------------------------------------
 

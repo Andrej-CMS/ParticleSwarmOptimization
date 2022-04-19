@@ -386,8 +386,8 @@ Double_t GetChi2FOM(TH1D* histoSignal,Double_t SignalWeight, TH1D* histoBackgrou
 
    TH1* mva_s_tr = (TH1*) mvaRes->GetHist("MVA_TRAIN_S");
    TH1* mva_b_tr = (TH1*) mvaRes->GetHist("MVA_TRAIN_B");
-   ksS=mva_s->KolmogorovTest(mva_s_tr);
-   ksB=mva_b->KolmogorovTest(mva_b_tr);
+   ksS=mva_s->KolmogorovTest(mva_s_tr, "X");
+   ksB=mva_b->KolmogorovTest(mva_b_tr, "X");
    KS=TMath::Min(ksS, ksB);
 
    std::cout<<"KS Sig: " << ksS << std::endl;

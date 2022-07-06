@@ -223,7 +223,7 @@ class QueHelper:
           'requirements = (OpSysAndVer == "CentOS7")',
 
           ' RequestMemory  =  2000',
-          '+RequestRuntime = nextweek',
+          '+RequestRuntime = 10799',
 
           'queue',
         ]
@@ -258,7 +258,7 @@ class QueHelper:
 
         self.ExecLines = [
 
-          "#!/bin/bash\n"
+          "#!/bin/bash\n",
           
         ]
 

@@ -92,12 +92,12 @@ class PSOManager:
             continue
           v=json.loads(var)
           ivars.append(str(v[0]))
-      # if len(additionalVariables)>0:
-      #   for i, var in enumerate(additionalVariables):
-      #     if "#" in var:
-      #       continue
-      #     v=json.loads(var)
-      #     avars.append(str(v[0]))
+      if len(additionalVariables)>0:
+        for i, var in enumerate(additionalVariables):
+          if "#" in var:
+            continue
+          v=json.loads(var)
+          avars.append(str(v[0]))
       if len(SpectatorVariables)>0:
         for i, var in enumerate(SpectatorVariables):
           if "#" in var:

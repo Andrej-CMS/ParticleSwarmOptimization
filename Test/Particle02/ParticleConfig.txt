@@ -1,0 +1,29 @@
+particleNumber 2
+Iteration 0
+FOM ROCIntegral
+SaveTrainingsToTrees False
+KSThreshold 0.2
+FactoryString !V:Silent:Color:!DrawProgressBar:Transformations=I:AnalysisType=Classification
+PreparationString SplitMode=Random:NormMode=EqualNumEvents:!V
+SignalWeightExpression 
+BackgroundWeightExpression 
+SignalTreeName ntp
+BackgroundTreeName ntp
+UseFixedTrainTestSplitting 0
+UseFixedTrainTestSplitting_Train "(eventNumber%2)==0"
+FindBestVariables 1
+MaxVariablesInCombination 2
+ImprovementThreshold 1.005
+RepeatTrainingNTimes 2
+MethodType TMVA::Types::kBDT
+coord NTrees 751
+coord Shrinkage 0.0332523863933
+coord GradBaggingFraction 0.669135933742
+coord nCuts 37
+MethodParameters !H:!V:NTrees=751:BoostType=Grad:Shrinkage=0.0332523863933:UseBaggedBoost:GradBaggingFraction=0.669135933742:nCuts=37:MaxDepth=2:NegWeightTreatment=IgnoreNegWeightsInTraining
+--InitialVariables--
+d0bprob2
+z0bprob2
+--EndInitVars--
+--additionalVariables--
+--EndAddVars--

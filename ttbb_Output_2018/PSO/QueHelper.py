@@ -14,8 +14,8 @@ class QueHelper:
     self.RunLines = []
 
     # change if you want to use a different CMSSW Version
-    self.CMSSW_BASE = os.environ['PATH']
-    self.SCRAM_ARCH = os.environ['PATH']
+    self.CMSSW_BASE = os.environ['CMSSW_BASE']
+    self.SCRAM_ARCH = os.environ['SCRAM_ARCH']
     print("\n----------------------------------------\n")
     print "using CMSSW_BASE="+self.CMSSW_BASE
     print "using SCRAM_ARCH="+self.SCRAM_ARCH
@@ -223,7 +223,7 @@ class QueHelper:
           'requirements = (OpSysAndVer == "CentOS7")',
 
           ' RequestMemory  =  2000',
-          '+RequestRuntime = nextweek',
+          '+RequestRuntime = 10799',
 
           'queue',
         ]
@@ -253,51 +253,6 @@ class QueHelper:
       self.RunLines = [
         'qsub '+' '.join(qsub_opts)+' -l os=sld5 -o INSERTPATHHERE/logs/\$JOB_NAME.o\$JOB_ID -e INSERTPATHHERE/logs/\$JOB_NAME.e\$JOB_ID INSERTEXECSCRIPTHERE\n'
       ] 
-      
-    elif RunSystem == "LXPLUS":
-
-        self.ExecLines = [
-
-          "#!/bin/bash\n"
-          
-        ]
-
-        # HTCondor getenv=True does not export LD_LIBRARY_PATH
-        # --> added by hand in the script itself
-        if 'LD_LIBRARY_PATH' in os.environ:
-           self.ExecLines += ['\n']
-           self.ExecLines += ['export LD_LIBRARY_PATH='+os.environ['LD_LIBRARY_PATH']]
-           self.ExecLines += ['\n\n']
-
-        self.ConfigLines = [
-
-          'batch_name = __BATCH_NAME__',
-
-          'executable = __EXEC_FILE__',
-
-          'output = __PATH__/logs/__NAME__'+'.out.'+'$(Cluster).$(Process)',
-          'error  = __PATH__/logs/__NAME__'+'.err.'+'$(Cluster).$(Process)',
-          'log    = __PATH__/logs/__NAME__'+'.log.'+'$(Cluster).$(Process)',
-
-          '#arguments = ',
-
-          'transfer_executable = True',
-
-          'universe = vanilla',
-
-          'getenv = True',
-
-          'should_transfer_files   = IF_NEEDED',
-          'when_to_transfer_output = ON_EXIT',
-
-          '#requirements = (OpSysAndVer == "SL6")',
-          'requirements = (OpSysAndVer == "CentOS7")',
-
-          ' RequestMemory  =  2000',
-          '+RequestRuntime = 10799',
-
-          'queue',
-        ]
 
     else:
       print "could not set up the batch system ", self.RunSystem

@@ -214,7 +214,6 @@ if(UseFixedTrainTestSplitting)
   AddSample("Signal_Train", SignalFile, SignalTree, selTrain);
   AddSample("Signal_Test" , SignalFile, SignalTree, selTest );
 
-
   AddSample("Background_Train", BackgroundFile, BackgroundTree, selTrain);
   AddSample("Background_Test" , BackgroundFile, BackgroundTree, selTest );
 }

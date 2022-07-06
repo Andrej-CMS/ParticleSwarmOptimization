@@ -1,0 +1,22 @@
+reading Config
+coord NTrees 1014
+coord Shrinkage 0.0303989
+coord GradBaggingFraction 0.185696
+coord nCuts 13
+Config File read
+--Initial Variables--
+d0bprob2
+z0bprob2
+--AdditionalVariables--
+--Method--
+TMVA::Types::kBDT
+!H:!V:NTrees=1014:BoostType=Grad:Shrinkage=0.0303989213575:UseBaggedBoost:GradBaggingFraction=0.185696153343:nCuts=13:MaxDepth=2:NegWeightTreatment=IgnoreNegWeightsInTraining
+----------------------------------------------------------------
+MethodString = !H:!V:NTrees=1014:BoostType=Grad:Shrinkage=0.0303989213575:UseBaggedBoost:GradBaggingFraction=0.185696153343:nCuts=13:MaxDepth=2:NegWeightTreatment=IgnoreNegWeightsInTraining
+Using Variables
+0 d0bprob2
+create data set info dataloader
+1 z0bprob2
+Running TMVA::DataLoader::PrepareTrainingAndTestTree("", "", "SplitMode=Random:NormMode=EqualNumEvents:!V")
+[37;41;1m<FATAL>                         : Expression correctCombination != 0 could not be resolved to a valid formula. [0m
+***> abort program execution

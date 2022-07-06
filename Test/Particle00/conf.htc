@@ -1,0 +1,32 @@
+
+batch_name = PSO0
+
+executable = /afs/cern.ch/work/a/asaibel/private/ParticleSwarmOptimization/Test/Particle00//PSO0.sh
+
+output = /afs/cern.ch/work/a/asaibel/private/ParticleSwarmOptimization/Test/Particle00//logs/PSO0.out.$(Cluster).$(Process)
+
+error  = /afs/cern.ch/work/a/asaibel/private/ParticleSwarmOptimization/Test/Particle00//logs/PSO0.err.$(Cluster).$(Process)
+
+log    = /afs/cern.ch/work/a/asaibel/private/ParticleSwarmOptimization/Test/Particle00//logs/PSO0.log.$(Cluster).$(Process)
+
+#arguments = 
+
+transfer_executable = True
+
+universe = vanilla
+
+getenv = True
+
+should_transfer_files   = IF_NEEDED
+
+when_to_transfer_output = ON_EXIT
+
+#requirements = (OpSysAndVer == "SL6")
+
+requirements = (OpSysAndVer == "CentOS7")
+
+ RequestMemory  =  2000
+
++RequestRuntime = 10799
+
+queue

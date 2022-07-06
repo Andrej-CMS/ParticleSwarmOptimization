@@ -1,0 +1,32 @@
+
+batch_name = PSO4
+
+executable = /afs/cern.ch/work/a/asaibel/private/ParticleSwarmOptimization/Test/Particle04//PSO4.sh
+
+output = /afs/cern.ch/work/a/asaibel/private/ParticleSwarmOptimization/Test/Particle04//logs/PSO4.out.$(Cluster).$(Process)
+
+error  = /afs/cern.ch/work/a/asaibel/private/ParticleSwarmOptimization/Test/Particle04//logs/PSO4.err.$(Cluster).$(Process)
+
+log    = /afs/cern.ch/work/a/asaibel/private/ParticleSwarmOptimization/Test/Particle04//logs/PSO4.log.$(Cluster).$(Process)
+
+#arguments = 
+
+transfer_executable = True
+
+universe = vanilla
+
+getenv = True
+
+should_transfer_files   = IF_NEEDED
+
+when_to_transfer_output = ON_EXIT
+
+#requirements = (OpSysAndVer == "SL6")
+
+requirements = (OpSysAndVer == "CentOS7")
+
+ RequestMemory  =  2000
+
++RequestRuntime = 10799
+
+queue

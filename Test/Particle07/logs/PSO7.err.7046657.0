@@ -1,4 +1,0 @@
-Error in <TTreeFormula::Compile>:  Bad numerical expression : "correctCombination"
-terminate called after throwing an instance of 'std::runtime_error'
-  what():  FATAL error
-condor_exec.exe: line 6:    72 Aborted                 ./Particle

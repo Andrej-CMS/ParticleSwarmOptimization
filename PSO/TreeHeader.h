@@ -13,6 +13,8 @@
 #include "TTreeFormula.h"
 #include "TMVA/Reader.h"
 #include "TBrowser.h"
+#include <TObjString.h>
+#include <TObjArray.h>
 
 using namespace std;
 

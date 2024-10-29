@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os, sys, subprocess, time
 
-from common import *
+from .common import *
 
 class QueHelper:
   def __init__(self,RunSystem):
@@ -17,28 +17,28 @@ class QueHelper:
     self.CMSSW_BASE = os.environ['PATH']
     self.SCRAM_ARCH = os.environ['PATH']
     print("\n----------------------------------------\n")
-    print "using CMSSW_BASE="+self.CMSSW_BASE
-    print "using SCRAM_ARCH="+self.SCRAM_ARCH
-    print "might not be the right choice, depending on your linux, target linux and CMSSW Version"
-    print "changeable in QueHelper.py"
+    print("using CMSSW_BASE="+self.CMSSW_BASE)
+    print("using SCRAM_ARCH="+self.SCRAM_ARCH)
+    print("might not be the right choice, depending on your linux, target linux and CMSSW Version")
+    print("changeable in QueHelper.py")
 
     if RunSystem=="EKPSL5":
       thisPortal=os.environ["HOSTNAME"]
       if thisPortal=="ekpcms5":
         thisque=os.environ["SGE_CLUSTER_NAME"]
         if thisque!="p_ogs1111":
-          print "you need to setup the sl5 que first"
-          print "source /opt/sge62/ekpcluster/common/settings.sh"
+          print("you need to setup the sl5 que first")
+          print("source /opt/sge62/ekpcluster/common/settings.sh")
           exit(1)
       elif thisPortal=="ekpcms6":
-        print "using sl5 que on ekpcms6 might lead to problems"
+        print("using sl5 que on ekpcms6 might lead to problems")
         thisque=os.environ["SGE_CLUSTER_NAME"]
         if thisque!="p_ogs1111":
-          print "you need to setup the sl5 que first"
-          print "source /opt/sge62/ekpcluster/common/settings.sh"
+          print("you need to setup the sl5 que first")
+          print("source /opt/sge62/ekpcluster/common/settings.sh")
           exit(1)
       else:
-        print "dont know this portal"
+        print("dont know this portal")
         exit(1)
       self.ExecLines=[
           "export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch\n",
@@ -54,13 +54,13 @@ class QueHelper:
       thisPortal=os.environ["HOSTNAME"]
       #print thisPortal
       if thisPortal!="ekpcms6":
-        print "WARNING"
-        print "you try to start jobs on the ekp SL6 que from ekpcms5"
-        print "do it from ekpcms or manually change QueHelper.py"
+        print("WARNING")
+        print("you try to start jobs on the ekp SL6 que from ekpcms5")
+        print("do it from ekpcms or manually change QueHelper.py")
       thisque=os.environ["SGE_CLUSTER_NAME"]
       if thisque!="p_ogs1111_sl6":
-          print "you need to setup the sl6 que first"
-          print "source /opt/ogs_sl6/ekpclusterSL6/common/settings.sh"
+          print("you need to setup the sl6 que first")
+          print("source /opt/ogs_sl6/ekpclusterSL6/common/settings.sh")
           exit(1)
       self.ExecLines=[
           "export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch\n",
@@ -290,21 +290,21 @@ class QueHelper:
           'should_transfer_files   = IF_NEEDED',
           'when_to_transfer_output = ON_EXIT',
 
-          '#requirements = (OpSysAndVer == "SL6")',
-          'requirements = (OpSysAndVer == "CentOS7")',
+#          '#requirements = (OpSysAndVer == "SL6")',
+#          '#requirements = (OpSysAndVer == "CentOS7")',
 
           ' RequestMemory  =  2000',
-          '+RequestRuntime = 10799',
+#          '+RequestRuntime = 10799',
 
           'queue',
         ]
 
     else:
-      print "could not set up the batch system ", self.RunSystem
-      print "check QueHelper.py"
+      print("could not set up the batch system ", self.RunSystem)
+      print("check QueHelper.py")
       exit(1)
 
-    print "set up QueHelper\n"
+    print("set up QueHelper\n")
 
   def GetExecLines(self):
     return self.ExecLines
@@ -325,7 +325,7 @@ class QueHelper:
 
          if ret != None:
 
-            ret_lines = ret[0].split('\n')
+            ret_lines = ret[0].decode('utf-8').split('\n')
 
             ret_lines = [_tmp for _tmp in ret_lines if _tmp != '']
 

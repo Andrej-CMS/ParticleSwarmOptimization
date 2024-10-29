@@ -6,11 +6,11 @@ def KILL(log):
 # --
 
 def WARNING(log):
-    print '\n '+'\033[1m'+'@@@ '+'\033[93m'+'WARNING'+'\033[0m'+' -- '+log+'\n'
+    print('\n '+'\033[1m'+'@@@ '+'\033[93m'+'WARNING'+'\033[0m'+' -- '+log+'\n')
 # --
 
 def EXE(cmd, suspend=True, verbose=False, dry_run=False):
-    if verbose: print '\033[1m'+'>'+'\033[0m'+' '+cmd
+    if verbose: print('\033[1m'+'>'+'\033[0m'+' '+cmd)
     if dry_run: return
 
     _exitcode = os.system(cmd)
@@ -116,7 +116,7 @@ def HTCondor_jobIDs(username=None, permissive=False, warn=False):
 
     if _condorq_ret == None: return None
 
-    _condorq_lines = _condorq_ret[0].split('\n')
+    _condorq_lines = _condorq_ret[0].decode('utf-8').split('\n')
 
     for _i_condorq in _condorq_lines:
 

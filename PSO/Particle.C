@@ -273,7 +273,7 @@ Double_t GetChi2FOM(TH1D* histoSignal,Double_t SignalWeight, TH1D* histoBackgrou
    dataloader->SetSignalWeightExpression    ( SigWeight );
 
    std::cout << "Running TMVA::DataLoader::PrepareTrainingAndTestTree(\"\", \"\", \""+PrepString+"\")" << std::endl;
-   dataloader->PrepareTrainingAndTestTree("correctCombination != 0", "correctCombination == 0 && swappedCombination == 0", PrepString);
+   dataloader->PrepareTrainingAndTestTree("", "", PrepString);
 
    //check method and book it
    if(MethodType=="TMVA::Types::kBDT")

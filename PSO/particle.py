@@ -3,7 +3,7 @@ import subprocess, math, ROOT
 
 from array import array
 
-from common import *
+from .common import *
 
 class Particle:
 
@@ -61,8 +61,8 @@ class Particle:
       self.DrawNRandomAsStartingVars=DrawNRandomAsStartingVars
 
       if self.Verbose:
-         print "-------------------------------------------"
-         print "setting up particle", self.particleNumber
+         print("-------------------------------------------")
+         print("setting up particle", self.particleNumber)
 
       if self.DrawNRandomAsStartingVars>0:
 
@@ -80,10 +80,10 @@ class Particle:
          self.additionalVariables=allVars
 
          if self.Verbose:
-            print "Drawing ", self.DrawNRandomAsStartingVars, " starting Variables"
-            print "usedVars\n", self.initialVariables
-            print "unusedVariables\n", self.additionalVariables
-            print il, len(self.initialVariables), len(self.additionalVariables)
+            print("Drawing ", self.DrawNRandomAsStartingVars, " starting Variables")
+            print("usedVars\n", self.initialVariables)
+            print("unusedVariables\n", self.additionalVariables)
+            print(il, len(self.initialVariables), len(self.additionalVariables))
 
       self.SaveTrainingsToTrees = SaveTrainingsToTrees
 
@@ -312,10 +312,10 @@ class Particle:
       self.BestKSGlobal=bestKSGlobal
 
       if self.Verbose:
-         print "\nUpdating particle ",self.particleNumber
-         print "current ", self.currentCoordinates
-         print "best global ", self.BestCoordinatesGlobal
-         print "best particle ", self.BestCoordinates
+         print("\nUpdating particle ",self.particleNumber)
+         print("current ", self.currentCoordinates)
+         print("best global ", self.BestCoordinatesGlobal)
+         print("best particle ", self.BestCoordinates)
 
       newCoords=[]
       for coord in self.Coordinates:
@@ -354,11 +354,11 @@ class Particle:
         newcoord = abs(cmp(newcoord,0)*max(abs(newcoord),coord[1]))
 
         if self.Verbose:
-           print "\nOld Coordinate ", coord[0],cc,curVel
-           print "best global ", bcg
-           print "best for this particle ", bcp
+           print("\nOld Coordinate ", coord[0],cc,curVel)
+           print("best global ", bcg)
+           print("best for this particle ", bcp)
 
-           print "New Coordinate ", newcoord, newVel
+           print("New Coordinate ", newcoord, newVel)
 
         newCoords.append([coord[0],newcoord,newVel])
 
@@ -413,9 +413,9 @@ class Particle:
                self.BestCoordinates.append([coord[0],coord[1]])
 
       if self.Verbose:
-         print "particle ", self.particleNumber
-         print self.BestCoordinates
-         print self.BestFOM
+         print("particle ", self.particleNumber)
+         print(self.BestCoordinates)
+         print(self.BestFOM)
 
       RouteFile=open(self.Path+"/ParticleRoute.txt","a")
       Route=str(fom).replace("\n","")+" "+str(ks).replace("\n","")+" "

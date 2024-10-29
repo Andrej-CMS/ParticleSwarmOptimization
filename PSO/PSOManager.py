@@ -1,10 +1,10 @@
 #!/us/bin/env python
 import os, sys, json, math, ROOT, time, subprocess
 
-from particle  import Particle
-from QueHelper import QueHelper
+from .particle  import Particle
+from .QueHelper import QueHelper
 
-from common import *
+from .common import *
 
 class PSOManager:
     def __init__(self, OutputDir='', DataSubdir='InitData', Verbose=True, PSOConfig=''):
@@ -105,9 +105,9 @@ class PSOManager:
           v=json.loads(var)
           svars.append(str(v[0]))
       #check the input variables
-      print "inital Variables ", len(ivars), ivars
-      print "additional Variables ", len(avars), avars
-      print "spectator Variables", len(svars), svars
+      print("inital Variables ", len(ivars), ivars)
+      print("additional Variables ", len(avars), avars)
+      print("spectator Variables", len(svars), svars)
       allVars=avars+ivars+svars
       for var1 in allVars:
         counter=0
@@ -115,10 +115,10 @@ class PSOManager:
           if var1==var2:
             counter+=1
           if counter>=2:
-            print "ERROR: input variables defined multiple times"
-            print var1
+            print("ERROR: input variables defined multiple times")
+            print(var1)
             exit(1)
-      print "ivars ", ivars
+      print("ivars ", ivars)
       self.usedVariables=ivars
       self.unusedVariables=avars
       #self.TenBestMVAs[0]=(0.0,0.0,0.0,0.0,0.0,0,2,self.usedVariables, self.unusedVariables)
@@ -206,7 +206,7 @@ class PSOManager:
         if "coord" in line:
           buff=line.split("=",1)[1]
           coord=json.loads(buff)
-          print "setting up coordinate ",coord
+          print("setting up coordinate ",coord)
           if coord not in self.Coordinates:
             self.Coordinates.append(coord)
             self.BestCoordinatesGlobal.append([coord[0],0.0])
@@ -232,17 +232,17 @@ class PSOManager:
             initValue=int(self.rand.Uniform(coord[1],coord[2]))
             initVelocity=int(self.rand.Uniform(-(coord[2]-coord[1]),(coord[2]-coord[1])))
             #now bound the velocity by the maximum
-            initVelocity=int(cmp(initVelocity,0)*min(abs(initVelocity),coord[3]))
+            initVelocity = int(((initVelocity > 0) - (initVelocity < 0)) * min(abs(initVelocity), coord[3]))
           elif coord[4]=="float":
-            initValue=float(self.rand.Uniform(coord[1],coord[2]))
-            initVelocity=float(self.rand.Uniform(-(coord[2]-coord[1]),(coord[2]-coord[1])))
+            initValue    = float(self.rand.Uniform(coord[1],coord[2]))
+            initVelocity = float(self.rand.Uniform(-(coord[2]-coord[1]),(coord[2]-coord[1])))
             #now bound the velocity by the maximum
-            initVelocity=float(cmp(initVelocity,0.0)*min(abs(initVelocity),coord[3]))
+            initVelocity = float(((initVelocity > 0) - (initVelocity < 0)) * min(abs(initVelocity), coord[3]))
           else:
-            print "ERROR: coordinates have to be int or float"
+            print("ERROR: coordinates have to be int or float")
             exit(1)
           initialCoords.append([coord[0],initValue,initVelocity]) 
-        print "Particle", part, " has inital coords ", initialCoords
+        print("Particle", part, " has inital coords ", initialCoords)
         particle = Particle(
           part_dir,
           part,
@@ -278,9 +278,9 @@ class PSOManager:
 #      print str(self.nParticles)+" Particles set up"
 
     def RunPSO(self):
-      print "\n-------------------------------------------------------------"
-      print "Starting Optimization"
-      print "doing ", self.NIterations, " Iterations\n" 
+      print("\n-------------------------------------------------------------")
+      print("Starting Optimization")
+      print("doing ", self.NIterations, " Iterations\n") 
       startTime=0
       finishTime=0
       totalTime=0.0
@@ -294,15 +294,15 @@ class PSOManager:
 
         running = True
 
-        print "\nIteration ", it
+        print("\nIteration ", it)
 
         if it!=0:
            estTime=totalTime/it * (nIterations-it)/60.0/60.0
-           print "optimization finished in ca ", estTime, " hours"
+           print("optimization finished in ca ", estTime, " hours")
 
         check_dt_sec = int(60)
 
-        print 'Number of particles finished: [checked every '+str(check_dt_sec)+'sec]'
+        print('Number of particles finished: [checked every '+str(check_dt_sec)+'sec]')
 
         while running:
 
@@ -336,14 +336,14 @@ class PSOManager:
           if nFinished == self.nParticles:
              running = False
 
-        print " "
+        print(" ")
         for particle in self.Particles:
 
           fom, KS, methodString, currentcoords, usedVars, unusedVars = particle.GetResult()
 
           if self.Verbose:
-             print "particle returned: "
-             print fom, KS, methodString, currentcoords, usedVars, unusedVars
+             print("particle returned: ")
+             print(fom, KS, methodString, currentcoords, usedVars, unusedVars)
 
           if fom >= self.TenBestMVAs[0][0]:
 
@@ -365,14 +365,14 @@ class PSOManager:
         for particle in self.Particles:
             particle.UpdateParticle(self.BestCoordinatesGlobal, it, self.BestFOMGlobal, self.BestKSGlobal)
 
-        print "\n------------------------------------------------------------------------"
+        print("\n------------------------------------------------------------------------")
 
-        print "Best Result after Iteration "+str(it)
+        print("Best Result after Iteration "+str(it))
 
-        print self.TenBestMVAs[0][:5]
+        print(self.TenBestMVAs[0][:5])
 
-        print "testing blabla "
-        print "OutputDir = ", self.OutputDir
+        print("testing blabla ")
+        print("OutputDir = ", self.OutputDir)
 
         self.SaveStatus(self.OutputDir+"/PSOResult.txt", self.OutputDir+"/FinalMVAConfig_PSO.txt", self.OutputDir+'.conf')
 
@@ -381,9 +381,9 @@ class PSOManager:
         totalTime += (finishTime-startTime)
 
     def PrintResult(self):
-        print 'Ten Best MVAs'
+        print('Ten Best MVAs')
         for i in range(10):
-            print self.TenBestMVAs[i][:5]
+            print(self.TenBestMVAs[i][:5])
 
     def SaveStatus(self, SaveFile, BestBDTFile, FinalMVAConfFile=None):
         savefile = open(SaveFile, 'w')
@@ -415,8 +415,8 @@ class PSOManager:
         bestBDTFile.write('\n')
         bestBDTFile.close()
 
-        print " OutputDir = " , self.OutputDir
-        print " usedVariables = ", self.usedVariables
+        print(" OutputDir = " , self.OutputDir)
+        print(" usedVariables = ", self.usedVariables)
 
         if FinalMVAConfFile != None:
 
@@ -462,7 +462,7 @@ class PSOManager:
                 #print line
                 VarCount+=1
           file.close()
-        print var, VarCount
+        print(var, VarCount)
         outfile.write(var+" "+str(VarCount)+"\n")
       for var in self.unusedVariables:
         VarCount=0
@@ -474,7 +474,7 @@ class PSOManager:
               if var in line:
                 VarCount+=1
           file.close()
-        print var, VarCount
+        print(var, VarCount)
         outfile.write(var+" "+str(VarCount)+"\n")
       outfile.close()
 
@@ -498,6 +498,6 @@ class PSOManager:
         if not os.path.isfile(Particle_C):
            raise RuntimeError('source code not found: '+Particle_C)
 
-        print 'Compiling '+Particle_C
-        print('g++ -o '+self.DataSubdir+'/Particle '+Particle_C+' `root-config --cflags --glibs` -lTMVA')
+        print('Compiling '+Particle_C)
+        print(('g++ -o '+self.DataSubdir+'/Particle '+Particle_C+' `root-config --cflags --glibs` -lTMVA'))
         subprocess.call(['g++ -o '+self.DataSubdir+'/Particle '+Particle_C+' `root-config --cflags --glibs` -lTMVA'], shell=True)

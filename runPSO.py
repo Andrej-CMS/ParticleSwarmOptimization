@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     DATA_SUBDIR = 'InitData'
 
-    print('Created dir '+opts.output_dir)
+    print(('Created dir '+opts.output_dir))
 
     OUTPUT_DIR = os.path.abspath(os.path.realpath(opts.output_dir))
     OUTPUT_SUBDIR = OUTPUT_DIR+'/'+DATA_SUBDIR

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-rm */*~
-rm */*.pyc
+rm -f */*~
+rm -f */*.pyc
+rm -f */*.py.bak
 
-rm */*_C.d
-rm */*_C.so
-rm */*_C_ACLiC_dict_rdict.pcm
+rm -f */*_C.d
+rm -f */*_C.so
+rm -f */*_C_ACLiC_dict_rdict.pcm

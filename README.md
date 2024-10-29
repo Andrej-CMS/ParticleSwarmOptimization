@@ -21,11 +21,22 @@ The Training of the BDTs is done on the batch system and is implemented in Parti
      specify Signal and Background trees   
      Variables the swarm starts with   
      pool of additional Variables the swarm will try  
+
+4) Setup environment with 
+    ```
+    source setup.sh
+    ```
+5) Start the Optimization with  
+    ```
+    python runPSO.py -c config_bb4l_ATLAS/PSOConfig_bb4l.txt -o bb4l_Output
+    ```
+    The PSO will start one job that submits and monitors HTCondor jobs to find the optimized settings.
+    The `watcher job` should be run in `screen` or `nohup`:
+    ```
+    nohup python runPSO.py -c config_bb4l_ATLAS/PSOConfig_bb4l.txt -o bb4l_Output_2016 --verbose >& optimize_BDT.out &
+    ```
     
-4) Start the Optimization with  
-    python RunPSO.py Example_PSOConfig.txt  
-    
-5) After each iteration the ten best classifiers are writen to PSOResult.txt  
+6) After each iteration the ten best classifiers are writen to PSOResult.txt  
    The best classifier and all necessary information is written to a file starting with "FinalMVAConfig_"  
    
    

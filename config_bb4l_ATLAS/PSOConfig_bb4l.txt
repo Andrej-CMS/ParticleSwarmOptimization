@@ -4,8 +4,8 @@
 RunOn=LXPLUS
 
 ## Swarm Parameters
-NParticles=50
-NIterations=30
+NParticles=35
+NIterations=20
 wIneratia=0.729
 wMemory=1.49445
 wSwarm=1.49445
@@ -22,7 +22,7 @@ ImprovementThreshold=1.002
 ## only reasonable if SplitSeed=0 is in the PreparationString a few lines down
 ## and if UseEvenOddSplitting=0
 ## FOM and KS will be taken as the worst of all trainings
-RepeatTrainingNTimes=3
+RepeatTrainingNTimes=2
 ## draw random starting variables, 0== use predermined starting variables
 DrawNRandomAsStartingVars=0
 ##NOTYET SaveTrainingsToTrees=False

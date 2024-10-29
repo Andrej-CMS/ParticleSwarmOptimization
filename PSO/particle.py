@@ -344,14 +344,14 @@ class Particle:
 
         newVel = self.vw*curVel + self.vp*rp*(bcp-cc)+self.vg*rg*(bcg-cc)
 
-        newVel = cmp(newVel,0) * min(abs(newVel),coord[3])
+        newVel = (newVel > 0) - (newVel < 0) * min(abs(newVel), coord[3])
 
         if   coord[4] == 'int'  : newVel = int  (newVel)
         elif coord[4] == 'float': newVel = float(newVel)
 
         newcoord = cc + newVel
-        newcoord = abs(cmp(newcoord,0)*min(abs(newcoord),coord[2]))
-        newcoord = abs(cmp(newcoord,0)*max(abs(newcoord),coord[1]))
+        newcoord = abs((newcoord > 0) - (newcoord < 0) * min(abs(newcoord), coord[2]))
+        newcoord = abs((newcoord > 0) - (newcoord < 0) * max(abs(newcoord), coord[1]))
 
         if self.Verbose:
            print("\nOld Coordinate ", coord[0],cc,curVel)
